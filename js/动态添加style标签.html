@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>动态添加style标签</title>
+<div class="demo"></div>
+ie浏览器上并不能直接style.innerHTML的方式给style标签动态添加css。
+需要使用style.styleSheet.cssText，如下：
+<script>
+var style = document.createElement('style');
+if(style.styleSheet){// IE  
+    style.styleSheet.cssText = '.demo{background-color:#000;height:10px;}';  
+} else {
+    style.innerHTML = '.demo{background-color:#000;height:10px;}';  
+}
+document.getElementsByTagName('head')[0].appendChild(style);
+</script>

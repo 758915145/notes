@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>文字溢出省略显示</title>
+<style>
+    div{
+        width:90px;
+    }
+    .demo{
+        text-overflow:ellipsis;
+        text-overflow:'…';
+        white-space:nowrap;
+        overflow:hidden;
+    }
+</style>
+<div class="demo">你看看是不是省略显示了</div>
+text-overflow定义用什么符号截断;
+white-space用于“设置如何处理元素内的空白”，nowrap 的意思是不换行。
+在某浏览器中不支持自定义符号，所以可以再加一句：text-overflow:ellipsis;
+但是，还是会有一些特殊要求，比如多行之后再省略：
+<style>
+/*超过两行再截断文字*/
+td div{
+    display: -webkit-box;
+    -webkit-line-clamp: 2;/*2 行*/
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+</style>
+上述 css 是table中的特殊情况，这些 css 不能直接写在 td 里面，因为 td 的 display
+跟这里的 display 冲突了，所以再加一次 div 给它。
