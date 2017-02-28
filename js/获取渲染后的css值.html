@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<style>
+    div{
+        height:100px;
+        background-color:#000;
+        color:#FFF;
+    }
+</style>
+
+<div></div>
+
+<script>
+    var div = document.getElementsByTagName('div')[0];
+    if(div.currentStyle){//IE
+        div.innerHTML = 'currentstyle:' + div.currentStyle.height
+    }else{//IE9+
+        div.innerHTML = 'getComputedStyle:' + getComputedStyle(div).height
+    }
+</script>

@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <style>
+        body {
+            margin: 50px;
+            font-family: '微软雅黑';
+            background-color: #f6f6fa
+        }
+        
+        .container {
+            overflow: hidden;
+            font-size:12px;
+        }
+        
+        .row {
+            position: relative;
+            width: 100%;
+        }
+        
+        .first {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            text-align: center;
+            background-color: #e5e5e8;
+            text-overflow: ellipsis;
+            text-overflow: '…';
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        
+        .lineFH {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 1px;
+            height: 40px;
+            background-color: #CCC;
+        }
+        
+        .item {
+            float: left;
+            position: relative;
+        }
+        
+        .item .lineH,
+        .item .lineHcut {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 1px;
+            height: 100px;
+            margin-top: -100px;
+            /*倍数关系*/
+            background-color: #CCC;
+        }
+        
+        .item .lineH::before {
+            content: "";
+            position: absolute;
+            background-color: #CCC;
+            width: 1px;
+            margin-left: -1px;
+            height: 15px;
+            left: 50%;
+            z-index: 2;
+        }
+        
+        .item .lineW {
+            position: absolute;
+            top: -0;
+            left: 0;
+            width: 100%;
+            height: 0px;
+            border-top: 1px solid #CCC;
+        }
+        
+        .item .name {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            box-sizing: border-box;
+            padding-top:2px;
+            writing-mode: vertical-lr;
+            text-align: center;
+            letter-spacing: 10px;
+            text-overflow: ellipsis;
+            text-overflow: '…';
+            white-space: nowrap;
+            overflow: hidden;
+            background-color: #e5e5e8;
+            transition: all .2s;
+            cursor: pointer;
+        }
+        
+        .item .name:hover {
+            background-color: #d4d8eb;
+        }
+        
+        .addBttom,
+        .addBttomF {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            margin-left: -15px;
+            width: 30px;
+            height: 30px;
+            background-color: #f6f6fa;
+            border-radius: 15px;
+            cursor: pointer;
+        }
+        
+        .addBttom::after,
+        .addBttomF::after {
+            position: absolute;
+            content: "+";
+            text-align: center;
+            color: #FFF;
+            background-color: #152d96;
+            width: 20px;
+            height: 20px;
+            line-height: 19px;
+            /*19看起来更居中一些*/
+            border-radius: 10px;
+            top: 5px;
+            left: 5px;
+            transition: all .2s;
+        }
+        
+        .addBttomF {
+            bottom: 35px;
+        }
+        
+        .addBttom:hover::after,
+        .addBttomF:hover::after {
+            box-shadow: 0 0 5px 1px #5c78f3;
+        }
+        
+        .item .addTop {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            margin-left: -15px;
+            width: 30px;
+            height: 30px;
+            background-color: #96a8f4;
+            border-radius: 15px;
+        }
+        
+        .item .firstW {
+            left: 50%;
+            width: 50%;
+        }
+        
+        .item .lastW {
+            width: 50%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container" class="container"></div>
+    <script>
+        var config = {
+            width: 40,
+            height:160
+        };
+        var container = document.getElementById('container');
+        var data = {
+            id: 1,
+            name: '广西交通投资集团',
+            child: [
+                {
+                    id: 2,
+                    name: '钦州公司',
+                    child: []
+                },
+                {
+                    id: 3,
+                    name: '北海公司',
+                    child: [
+                        {
+                            id: 5,
+                            name: '合浦公司',
+                            child: [
+                                {
+                                    id: 5,
+                                    name: '公司1',
+                                    child: []
+                                },
+                                {
+                                    id: 6,
+                                    name: '公司2',
+                                    child: []
+                                }
+                            ]
+                        },
+                        {
+                            id: 6,
+                            name: '银海公司',
+                            child: []
+                        }
+                    ]
+                },
+                {
+                    id: 4,
+                    name: '南宁公司',
+                    child: []
+                },
+                {
+                    id: 4,
+                    name: '桂林公司',
+                    child: [
+                        {
+                            id: 4,
+                            name: '象鼻山公司',
+                            child: []
+                        },
+                        {
+                            id: 4,
+                            name: '叠彩公司',
+                            child: []
+                        }
+                    ]
+                },
+                {
+                    id: 4,
+                    name: '玉林公司',
+                    child: []
+                },
+                {
+                    id: 4,
+                    name: '白色公司',
+                    child: []
+                },
+            ]
+        };
+
+        show(data);
+
+        function show(data) {
+            //初始化格子们 - start
+            var r = getCount(data);
+            var c = r.c;//总列数
+            r = r.r;//总行数
+            container.style.display = 'none';//先隐藏，提升性能
+            container.style.width = c * config.width + 'px';//设置容器的宽度
+
+            //插入空节点
+            var rowhtml = '<div class="row">';
+            var html = '';
+            for (var i = 0; i < c; i++) {
+                rowhtml += '<div class="item"><div class="lineW"></div></div>';
+            }
+            rowhtml += '</div>';
+            for (var i = 0; i < r; i++) {
+                html += rowhtml;
+            }
+            container.innerHTML = html;
+            //初始化格子们 - end
+
+            //绘制第一行
+            var nextdata = {};//记录有子元素的节点
+            var row = container.childNodes[0];
+            var dom = row.childNodes[0];
+            data.child.forEach(function (item) {
+                l2r(item, nextdata);
+            });
+
+            //绘制其他行
+            addDOM(nextdata);
+
+            //去除多余的线
+            row = container.childNodes;
+            [].forEach.call(row, function (item, index) {
+                dom = item.childNodes[0];
+                clearfromleft(dom);
+                if (index === 0) {
+                    dom = item.childNodes[item.childNodes.length - 1];
+                    clearfromright(dom);
+                }
+            });
+
+            //绘制最顶层公司名
+            var div = document.createElement('div');
+            div.className = 'row';
+            div.innerHTML = '<div class="first" title="' + data.name + '">' + data.name + '</div><div class="addBttomF" title="添加子节点"></div><div class="lineFH"></div>';
+            container.insertBefore(div, container.childNodes[0]);
+
+            //添加样式
+            var style = document.createElement('style');
+            var str = '.row {\
+                height:'+config.height+'px;\
+            }\
+            .first {\
+                width:'+config.height+'px;\
+                margin-left:-'+config.height/2+'px;\
+                height:'+config.width+'px;\
+                line-height:'+config.width+'px;\
+            }\
+            .item {\
+                width:'+config.width+'px;\
+                height:'+config.height+'px;\
+            }\
+            .item .lineH,\
+            .item .lineHcut {\
+                height: '+(config.height/2)+'px;\
+                margin-top: '+(-config.height/2)+'px;\
+            }\
+            .item .lineH::before {\
+                top:'+(config.height-15)+'px\
+            }\
+            .item .name {\
+                height:'+(config.height-50)+'px;\
+                line-height:'+config.width+'px;\
+                margin-top:'+(-(config.height-50)/2)+'px;\
+            }';
+            if (style.styleSheet) {// IE  
+                style.styleSheet.cssText = str;
+            } else {// w3c  
+                style.innerHTML = str;
+            }
+            container.insertBefore(style, div);
+
+            container.style.display = 'block';//绘制完了，显示
+
+            //从左到右绘制节点
+            function l2r(data, nextdata) {
+                if (data.child.length === 0) {
+                    //直接插入节点
+                    dom.innerHTML = '<div class="lineHcut"></div>\
+                            <div class="lineW"></div>\
+                            <div class="name" title="'+ data.name + '">'+ data.name + '</div>\
+                            <div class="addBttom" title="添加子节点"></div>';
+                } else {
+                    var num = getCount(data, {
+                        child: true
+                    });
+
+                    //跳到中心位置
+                    dom = next(dom, num - 1);
+
+                    //插入节点
+                    dom.innerHTML = '<div class="lineH"></div>\
+                            <div class="lineW"></div>\
+                            <div class="name" title="'+ data.name + '">'+ data.name + '</div>\
+                            <div class="addBttom" title="添加子节点"></div>';
+                    nextdata[[].indexOf.call(row.childNodes, dom)] = data;//记录下一行需要用的数据
+
+                    //跳到末尾位置
+                    dom = next(dom, num - 1);
+                }
+                dom = next(dom, 2);//留白
+            }
+
+            //绘制其他行
+            function addDOM(nextdata) {
+                var nextdata2 = {};
+                row = next(row);
+                for (var key in nextdata) {
+
+                    //这里是中心节点
+                    dom = row.childNodes[key];
+
+                    //跳到最左边的节点
+                    var num = getCount(nextdata[key], {
+                        child: true
+                    });
+                    dom = prev(dom, num - 1);
+
+                    for (var i = 0; i < num; i++) {
+                        if (nextdata[key].child[i])
+                            l2r(nextdata[key].child[i], nextdata2);
+
+                        //清除这附近顶部的横线
+                        if (i === num - 1) {
+                            var temp = prev(dom);
+                            prev(temp).querySelector('.lineW').className = 'lineW lastW';
+                        }
+                    }
+                }
+                var key;
+                for (key in nextdata2) { }
+                if (key) addDOM(nextdata2);
+            }
+        }
+
+        //上一个节点
+        function prev(obj, num) {
+            var rt = obj;
+            if (!rt) return undefined;
+            function _prev_() {
+                if (!rt) return;
+                rt = rt.previousSibling;
+                if (!rt) return;
+                if (rt.nodeName === "#text") {
+                    _prev_();
+                }
+            }
+            num = num || 1;
+            for (var i = 0; i < num; i++) {
+                _prev_();
+            }
+            return rt;
+        }
+
+        //下一个节点
+        function next(obj, num, clearW) {
+            var rt = obj;
+            if (!rt) return undefined;
+            function _next_() {
+                if (!rt) return;
+                rt = rt.nextSibling;
+                if (!rt) return;
+                if (rt.nodeName === "#text") {
+                    _next_();
+                }
+            }
+            num = num || 1;
+            for (var i = 0; i < num; i++) {
+                _next_();
+            }
+            return rt;
+        }
+
+        //计算格子数
+        function getCount(data, option) {
+            var r = 0;
+            function _getCount_(data, ceng) {
+                if (r < ++ceng) r = ceng;
+                var Count = 0;
+                data.child.forEach(function (item) {
+                    if (item.child.length > 0) {
+                        Count += _getCount_(item, ceng);
+                    } else {
+                        Count++;
+                    }
+                });
+                return Count;
+            }
+            if (!option) return { c: _getCount_(data, 0) * 2 - 1, r: r };//如5个公司，需要9个格子
+            if (option.r) {
+                return r;
+            } else if (option.c) {
+                return _getCount_(data, 0) * 2 - 1;
+            } else if (option.child) {
+                return _getCount_(data, 0);
+            }
+        }
+
+        //清除左边的线
+        function clearfromleft(dom, frist) {
+            if (!dom) return;
+            if (frist) {
+                if (dom.querySelector('.lastW')) {
+                    dom = next(dom);
+                    clearfromleft(dom);
+                    return;
+                }
+                dom = next(dom);
+                clearfromleft(dom, true);
+                return;
+            }
+            if (dom.childNodes.length === 1) {
+                dom.innerHTML = '';
+                dom = next(dom);
+                clearfromleft(dom)
+            } else {
+                var a = dom.querySelector('.lineW');
+                if (a)
+                    a.className = 'lineW firstW';
+                dom = next(dom);
+                clearfromleft(dom, true);
+            }
+        }
+
+        //清除第一行右边的线
+        function clearfromright(dom) {
+            if (!dom) return;
+            if (dom.childNodes.length === 1) {
+                dom.innerHTML = '';
+                dom = prev(dom);
+                clearfromright(dom)
+            } else {
+                var a = dom.querySelector('.lineW');
+                if (a)
+                    a.className = 'lineW lastW';
+            }
+        }
+    </script>
+</body>
+
+</html>

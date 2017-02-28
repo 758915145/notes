@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <style>
+            #container{
+                overflow:hidden;
+                position:relative;
+                background-color:#F9F9F9;
+                height:300px;
+                width:200px;
+                border:1px solid #999;
+            }
+            .scroll{
+                padding:10px;
+                position:absolute;
+                box-sizing:border-box;
+                top:0;
+                left:0;
+                width:100%;
+                overflow:hidden;
+                transition:all .2s;
+            }
+            .item{
+                height:40px;
+                margin-bottom:10px;
+                background-color:#CCC;
+                border-radius:4px;
+            }
+            .bar{
+                width:5px;
+                position:absolute;
+                right:0;
+                top:0;
+                transition:all .2s;
+                background-color:#999;
+            }
+            .bar:hover{
+                background-color:#BBB;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="container">
+            <div class="scroll">
+                <div class="item"></div>
+                <div class="item"></div>
+                <div class="item"></div>
+                <div class="item"></div>
+                <div class="item"></div>
+                <div class="item"></div>
+                <div class="item"></div>
+                <div class="item"></div>
+                <div class="item"></div>
+                <div class="item"></div>
+                <div class="item"></div>
+            </div>
+        </div>
+        <script>
+            -function(w,d){
+                //window事件监听
+                w.$on = function(name,func){
+                    if(name==='mousewhell'){
+                        /*滚轮事件促发函数*/
+                        this.onmousewheel = function(e) {/*IE、谷歌滚轮*/
+                            e = e || w.event;
+                            w.$emit('mousewhell',e.wheelDelta<0?-1:1);
+                        };
+                        w.addEventListener && this.addEventListener("DOMMouseScroll", function(e) {/*火狐滚轮*/
+                            w.$emit('mousewhell',e.detail>0?-1:1);
+                        });
+                    }
+                    if(typeof func==='function'){
+                        w.$on.event[name]?
+                        w.$on.event[name].push(func):
+                        w.$on.event[name] = [func];
+
+                        //保存this
+                        w.$on.this[name]?
+                        w.$on.this[name].push(this):
+                        w.$on.this[name] = [this];
+                    }else{
+                        console.log(name+'：传入的函数不合法');
+                    }
+                }
+                w.$on.event = {};
+                w.$on.this = {};
+                w.$emit = function(name,data){
+                    if(w.$on.event[name]){
+                        w.$on.event[name].forEach(function(item,index){
+                            item.call(w.$on.this[name][index],data);
+                        });
+                    }else{
+                        console.log('没发现有「'+name+'」事件');
+                    }
+                }
+
+                Object.prototype.$on = function(name,func){
+                    w.$on.call(this,name,func);
+                }
+            }(window,document);
+
+            //获取一些基本信息
+            var scroll = document.querySelector('.scroll');
+            var container = document.querySelector('#container');
+            var ch = parseInt(getComputedStyle(container).height);
+            var sh = parseInt(getComputedStyle(scroll).height);
+            var maxScroll = sh - ch;
+            var once = 40;
+
+            //插入滚动条
+            var div = document.createElement('div');
+            div.className = 'bar';
+            div.style.cssText = ';height:'+ch/sh*ch+'px';
+            container.appendChild(div);
+
+            //监听滚动事件
+            scroll.$on('mousewhell',function(d){
+                var top = parseInt(this.style.top) || parseInt(getComputedStyle(this).top);
+                if(d<0){
+                    var val = (top - once > -maxScroll? top - once:-maxScroll);
+                    this.style.top = val + 'px';
+                    div.style.top = -ch/sh*val + 'px';
+                }else{
+                    var val = (top + once > 0? 0:top + once);
+                    this.style.top = val + 'px';
+                    div.style.top = -ch/sh*val + 'px';
+                }
+            });
+
+            //拖动事件
+            div.onmousedown = function(e){
+                var y = e.clientY;
+                div.style.transition = 'none';
+                scroll.style.transition = 'none';
+                document.onmousemove = function(e){
+                    e.preventDefault();
+                    var top = parseInt(div.style.top) || parseInt(getComputedStyle(div).top);
+                    top += e.clientY - y;
+                    if(top<(ch - ch/sh*ch) && top>0){
+                        div.style.top = top + 'px';
+                        scroll.style.top = -top/(ch/sh) + 'px';
+                    }else if(top===0){
+                        div.style.top = '0px';
+                        scroll.style.top = 0;
+                    }else if(top===ch - ch/sh*ch){
+                        div.style.top = ch - ch/sh*ch + 'px';
+                        scroll.style.top = -maxScroll+'px';
+                    }
+                    y = e.clientY;
+                }
+
+                //解除拖动事件
+                document.onmouseup = function(e){
+                    document.onmousemove = undefined;
+                    div.style.transition = 'all .2s';
+                    scroll.style.transition = 'all .2s';
+                };
+            };
+        </script>
+    </body>
+</html>

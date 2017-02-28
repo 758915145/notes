@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<script>
+    document.onclick = function(e){
+        e = e || window.event;
+        e.srcElement;//IE
+        e.target;//else
+    }
+</script>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<script>
+    //window事件监听
+    window._event_ = {};
+    window.$on = function (name, func) {
+        if (typeof func === 'function') {
+            window.$on.event[name] ?
+                window.$on.event[name].push(func) :
+                window.$on.event[name] = [func];
+        } else {
+            console.log(name + '：传入的函数不合法');
+        }
+    }
+    window.$on.event = {};
+    window.$emit = function (name, data) {
+        if (window.$on.event[name]) {
+            window.$on.event[name].forEach(function (item) {
+                item.call(window, data);
+            });
+        } else {
+            console.log('没发现有「' + name + '」事件');
+        }
+    }
+
+</script>
